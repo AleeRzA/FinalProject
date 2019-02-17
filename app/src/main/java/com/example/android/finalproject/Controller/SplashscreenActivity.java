@@ -22,6 +22,7 @@ public class SplashscreenActivity extends AppCompatActivity {
         setContentView(R.layout.activity_splashscreen);
         mLottieAnimationView = findViewById(R.id.animation_view);
         mLottieAnimationView.setSpeed(1.2f);
+
         new Handler().postDelayed(new Runnable() {
             @Override
             public void run() {
@@ -37,4 +38,6 @@ public class SplashscreenActivity extends AppCompatActivity {
         }, 4000);
 
     }
+
+
 }

@@ -1,20 +1,33 @@
 package com.example.android.finalproject.Controller;
 
+import android.app.ProgressDialog;
 import android.content.Context;
 import android.net.Uri;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.v4.app.Fragment;
 import android.support.v7.widget.CardView;
-import android.support.v7.widget.GridLayoutManager;
+import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageView;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.example.android.finalproject.R;
+import com.example.android.finalproject.model.Products;
+import com.example.android.finalproject.network.APIFetching;
+import com.example.android.finalproject.network.RetrofitClientInstance;
+import com.squareup.picasso.Picasso;
+
+import java.util.ArrayList;
+import java.util.List;
+
+import retrofit2.Call;
+import retrofit2.Callback;
+import retrofit2.Response;
 
 public class MainFragment extends Fragment {
     // TODO: Rename parameter arguments, choose names that match
@@ -25,10 +38,16 @@ public class MainFragment extends Fragment {
     private TextView mRecentText;
     private TextView mPopularText;
     private TextView mRecomendedText;
-    private RecyclerView mRecyclerView;
+    private RecyclerView mRecyclerViewRecent;
+    private RecyclerView mRecyclerViewPopular;
+    private RecyclerView mRecyclerViewRecommended;
+
+    private List<Products> mProductsRecent = new ArrayList<>();
+    private List<Products> mProductsPopular = new ArrayList<>();
+    private List<Products> mProductsRecommended = new ArrayList<>();
 
     private ImageView mImageView;
-
+    private ProgressDialog mProgressDialog;
     private OnFragmentInteractionListener mListener;
 
     public MainFragment() {
@@ -49,6 +68,63 @@ public class MainFragment extends Fragment {
 //            mParam1 = getArguments().getString(ARG_PARAM1);
 //            mParam2 = getArguments().getString(ARG_PARAM2);
         }
+        setRetainInstance(true);
+        mProgressDialog = new ProgressDialog(getActivity());
+        mProgressDialog.setMessage("Please Wait");
+        mProgressDialog.show();
+
+        APIFetching apiFetching = RetrofitClientInstance
+                .getRetrofitInstance()
+                .create(APIFetching.class);
+
+               apiFetching.getRecentProducts()
+                .enqueue(new Callback<List<Products>>() {
+                    @Override
+                    public void onResponse(Call<List<Products>> call, Response<List<Products>> response) {
+                        if(response.isSuccessful()){
+                            mProductsRecent = response.body();
+                            mProgressDialog.cancel();
+                            setupAdapter();
+                        }
+                    }
+                    @Override
+                    public void onFailure(Call<List<Products>> call, Throwable t) {
+                        Toast.makeText(getActivity(), "Something went wrong", Toast.LENGTH_SHORT).show();
+                    }
+                });
+               apiFetching.getRecentProducts()
+                       .enqueue(new Callback<List<Products>>() {
+                           @Override
+                           public void onResponse(Call<List<Products>> call, Response<List<Products>> response) {
+                               mProductsRecent = response.body();
+                               mProductsRecommended = response.body();
+                               mProgressDialog.cancel();
+                               setupAdapter();
+                           }
+
+                           @Override
+                           public void onFailure(Call<List<Products>> call, Throwable t) {
+
+                           }
+                       });
+               apiFetching.getTopSellers().enqueue(new Callback<List<Products>>() {
+                   @Override
+                   public void onResponse(Call<List<Products>> call, Response<List<Products>> response) {
+                       mProductsPopular = response.body();
+                       setupAdapter();
+                   }
+
+                   @Override
+                   public void onFailure(Call<List<Products>> call, Throwable t) {
+                       Toast.makeText(getActivity(), "Something popular went wrong", Toast.LENGTH_SHORT).show();
+                   }
+               });
+    }
+    private void setupAdapter() {
+        if (isAdded())
+            mRecyclerViewRecent.setAdapter(new shopItemAdapter(mProductsRecent));
+            mRecyclerViewPopular.setAdapter(new shopItemAdapter(mProductsPopular));
+            mRecyclerViewRecommended.setAdapter(new shopItemAdapter(mProductsRecommended));
     }
 
     @Override
@@ -59,10 +135,20 @@ public class MainFragment extends Fragment {
         mRecentText = view.findViewById(R.id.recents_txt);
         mPopularText = view.findViewById(R.id.popular_txt);
         mRecomendedText = view.findViewById(R.id.recomended_txt);
-        mRecyclerView = view.findViewById(R.id.recents_recView);
+        mRecyclerViewRecent = view.findViewById(R.id.recents_recView);
+        mRecyclerViewRecent.setLayoutManager(new LinearLayoutManager(getActivity()
+                                        ,LinearLayoutManager.HORIZONTAL
+                                        , false));
+        mRecyclerViewPopular = view.findViewById(R.id.popular_recView);
+        mRecyclerViewPopular.setLayoutManager(new LinearLayoutManager(getActivity()
+                                                , LinearLayoutManager.HORIZONTAL
+                                                , false));
+        mRecyclerViewRecommended = view.findViewById(R.id.recomended_recView);
+        mRecyclerViewRecommended.setLayoutManager(new LinearLayoutManager(getActivity()
+                , LinearLayoutManager.HORIZONTAL
+                , false));
 
-        mRecyclerView.setLayoutManager(new GridLayoutManager(getActivity(), 3));
-        mRecyclerView.setAdapter(new viewAdapter());
+        setupAdapter();
         return view;
     }
 
@@ -94,50 +180,65 @@ public class MainFragment extends Fragment {
         void onFragmentInteraction(Uri uri);
     }
 
-    private class viewHolder extends RecyclerView.ViewHolder{
-        private View mView;
-        private CardView mCardView;
-        private TextView mTitle;
-        private TextView mArtist;
+    private class shopItemViewHolder extends RecyclerView.ViewHolder{
 
-        public viewHolder(@NonNull View itemView) {
+        private CardView mCardView;
+        private TextView mProductName, mProductPrice;
+        private Products mShopItem;
+
+        public shopItemViewHolder(@NonNull View itemView) {
             super(itemView);
+            mCardView = itemView.findViewById(R.id.card_view);
             mImageView = itemView.findViewById(R.id.thumbnail);
+            mProductName = itemView.findViewById(R.id.item_title);
+            mProductPrice = itemView.findViewById(R.id.item_price);
+
             mCardView.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {
-
+                    Toast.makeText(getActivity(), mProductName.getText(), Toast.LENGTH_SHORT).show();
                 }
             });
         }
-        public void bind(){
-            mImageView.setImageDrawable(getResources().getDrawable(R.drawable.ic_shop_bot));
+        public void bind(Products products){
+            mShopItem = products;
+            mCardView.setCardBackgroundColor(getResources().getColor(android.R.color.background_light));
+            mProductName.setText(products.getName());
+            mProductPrice.setText(products.getPrice() != null ? products.getPrice() : "Not available price");
+
+            if(mShopItem.getImages()!=null&& mShopItem.getImages().size()>0){
+                Picasso.get().load(mShopItem.getImages().get(0).getImgSrc()).into(mImageView);
+
+            }
         }
     }
-    private class viewAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder>{
+    private class shopItemAdapter extends RecyclerView.Adapter<shopItemViewHolder>{
 
+        private List<Products> mProductsList;
 
-        public viewAdapter() {
+        public shopItemAdapter(List<Products> products) {
+            mProductsList = products;
         }
 
         @NonNull
         @Override
-        public viewHolder onCreateViewHolder(@NonNull ViewGroup viewGroup, int i) {
+        public shopItemViewHolder onCreateViewHolder(@NonNull ViewGroup viewGroup, int i) {
             View view = LayoutInflater
                     .from(getActivity())
                     .inflate(R.layout.shop_list_item,viewGroup, false);
-            return new viewHolder(view);
+            return new shopItemViewHolder(view);
         }
 
         @Override
-        public void onBindViewHolder(@NonNull RecyclerView.ViewHolder viewHolder, int i) {
-            mImageView.setImageDrawable(getResources().getDrawable(R.drawable.ic_shop_bot));
+        public void onBindViewHolder(@NonNull shopItemViewHolder shopItemViewHolder, int i) {
+            Products shopItems = mProductsList.get(i);
+            shopItemViewHolder.bind(shopItems);
         }
 
 
         @Override
         public int getItemCount() {
-            return 0;
+            return mProductsList.size();
         }
 
         @Override
@@ -148,4 +249,30 @@ public class MainFragment extends Fragment {
             return super.getItemViewType(position);
         }
     }
+//    private class ShopTask extends AsyncTask<Void, Void, List<Products>> {
+//
+//        @Override
+//        protected List<Products> doInBackground(Void... voids) {
+//            try {
+////                List<Products> galleryItems = new APIFetcher().fetchItems();
+//                return galleryItems;
+//            } catch (IOException e) {
+//                e.printStackTrace();
+//            }
+//            return null;
+//        }
+//
+//        @Override
+//        protected void onProgressUpdate(Void... values) {
+//            super.onProgressUpdate(values);
+//        }
+//
+//        @Override
+//        protected void onPostExecute(List<Products> galleryItems) {
+//            super.onPostExecute(galleryItems);
+//            mProductsList = galleryItems;
+//            setupAdapter();
+//        }
+//    }
+
 }

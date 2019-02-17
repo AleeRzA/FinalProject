@@ -29,8 +29,9 @@
                 card_view:srcCompat="@drawable/ic_shop_bot"/>
 
             <TextView
-                android:id="@+id/song_title"
+                android:id="@+id/item_title"
                 android:text="Alllll"
+                android:textDirection="rtl"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_below="@id/thumbnail"
@@ -41,21 +42,27 @@
                 android:textSize="@dimen/album_title" />
 
             <TextView
-                android:id="@+id/song_artist"
-                android:text="A2lllll"
+                android:id="@+id/item_price"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_below="@id/song_title"
-                android:paddingBottom="@dimen/songs_count_padding_bottom"
+                android:layout_below="@id/item_title"
+                android:layout_marginStart="-20dp"
+                android:layout_marginLeft="-20dp"
+                android:layout_toEndOf="@+id/overflow"
+                android:layout_toRightOf="@+id/overflow"
                 android:paddingLeft="@dimen/album_title_padding"
                 android:paddingRight="@dimen/album_title_padding"
+                android:paddingBottom="@dimen/songs_count_padding_bottom"
+                android:text="A2lllll"
+                android:textDirection="rtl"
+                android:textAllCaps="false"
                 android:textSize="@dimen/songs_count" />
 
             <ImageView
                 android:id="@+id/overflow"
                 android:layout_width="@dimen/ic_album_overflow_width"
                 android:layout_height="@dimen/ic_album_overflow_height"
-                android:layout_alignParentRight="true"
+                android:layout_alignParentLeft="true"
                 android:layout_below="@id/thumbnail"
                 android:layout_marginTop="@dimen/ic_album_overflow_margin_top"
                 android:scaleType="centerCrop"
