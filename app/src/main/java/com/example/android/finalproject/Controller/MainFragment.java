@@ -62,7 +62,7 @@ public class MainFragment extends Fragment {
     }
 
     @Override
-    public void onCreate(Bundle savedInstanceState) {
+public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         if (getArguments() != null) {
 //            mParam1 = getArguments().getString(ARG_PARAM1);
@@ -196,6 +196,11 @@ public class MainFragment extends Fragment {
             mCardView.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {
+                    ShopItemFragment shopItemFragment = ShopItemFragment.newInstance(mShopItem.getId());
+                    getFragmentManager().beginTransaction()
+                                .replace(R.id.fragment_container, shopItemFragment)
+                                .addToBackStack(MainFragment.class.getName())
+                                .commit();
                     Toast.makeText(getActivity(), mProductName.getText(), Toast.LENGTH_SHORT).show();
                 }
             });
@@ -208,7 +213,6 @@ public class MainFragment extends Fragment {
 
             if(mShopItem.getImages()!=null&& mShopItem.getImages().size()>0){
                 Picasso.get().load(mShopItem.getImages().get(0).getImgSrc()).into(mImageView);
-
             }
         }
     }

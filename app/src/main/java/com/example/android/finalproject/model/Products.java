@@ -8,17 +8,24 @@ public class Products {
 
         private String name;
 
+        private int id;
+
         private String price;
 
-        public Products(List<Image> images, String name, String price) {
+        public Products(List<Image> images, String name, String price, int id) {
             this.images = images;
             this.name = name;
             this.price = price;
+            this.id = id;
+        }
+
+        public int getId() {
+            return id;
         }
 
         public List<Image> getImages() {
-            return images;
-        }
+                return images;
+            }
 
         public String getName() {
             return name;

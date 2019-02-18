@@ -7,7 +7,8 @@ import android.support.v4.app.Fragment;
 
 public class MainActivity
         extends SingleFragmentActivity
-        implements MainFragment.OnFragmentInteractionListener{
+        implements MainFragment.OnFragmentInteractionListener
+        , ShopItemFragment.OnFragmentInteractionListener{
 
     public static Intent newIntent(Context context){
         Intent intent = new Intent(context, MainActivity.class);
